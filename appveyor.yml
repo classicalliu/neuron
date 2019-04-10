@@ -1,0 +1,43 @@
+image: Visual Studio 2017
+
+platform:
+  - x64
+
+environment:
+  matrix:
+    - nodejs_version: '11.10.1'
+
+cache:
+  - '%LOCALAPPDATA%/Yarn'
+  - node_modules
+  - C:\ProgramData\chocolatey\bin -> appveyor.yml
+  - C:\ProgramData\chocolatey\lib -> appveyor.yml
+
+matrix:
+  fast_finish: true
+
+build: off
+
+version: '{build}'
+
+shallow_clone: false
+
+clone_depth: 1
+
+install:
+  - node --version
+  - where node
+  - yarn --version
+  - where yarn
+  # - appveyor-retry choco install nodejs -y --version %nodejs_version%
+  - appveyor-retry choco install yarn -y --version 1.13.0
+  - where yarn
+  - dir C:\ProgramData\chocolatey\bin
+  - dir C:\ProgramData\chocolatey\lib
+  - appveyor-retry yarn install
+  - appveyor-retry yarn lerna bootstrap
+
+test_script:
+  - git diff --exit-code yarn.lock
+  - yarn build
+  - yarn test
