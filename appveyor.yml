@@ -10,6 +10,8 @@ environment:
 cache:
   - '%LOCALAPPDATA%/Yarn'
   - node_modules
+  - C:\Program Files (x86)\nodejs
+  - C:\Program Files (x86)\Yarn\bin
   - C:\ProgramData\chocolatey\bin -> appveyor.yml
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
 
@@ -29,11 +31,12 @@ install:
   - where node
   - yarn --version
   - where yarn
-  # - appveyor-retry choco install nodejs -y --version %nodejs_version%
-  - appveyor-retry choco install yarn -y --version 1.13.0
+  - choco install nodejs -y --version %nodejs_version%
+  - choco install yarn -y --version 1.13.0
+  - where node
+  - node --version
   - where yarn
-  - dir C:\ProgramData\chocolatey\bin
-  - dir C:\ProgramData\chocolatey\lib
+  - yarn --version
   - appveyor-retry yarn install
   - appveyor-retry yarn lerna bootstrap
 
