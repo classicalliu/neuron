@@ -1,7 +1,7 @@
 {
   "type": "sqlite",
   "synchronize": true,
-  "logging": true,
+  "logging": false,
   "entities": [
      "packages/neuron-wallet/src/entities/**/*.ts"
   ],
