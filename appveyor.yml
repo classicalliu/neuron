@@ -10,7 +10,7 @@ environment:
 cache:
   - '%LOCALAPPDATA%/Yarn'
   - node_modules
-  - C:\Program Files (x86)\nodejs
+  - C:\Program Files\nodejs
   - C:\Program Files (x86)\Yarn\bin
   - C:\ProgramData\chocolatey\bin -> appveyor.yml
   - C:\ProgramData\chocolatey\lib -> appveyor.yml
