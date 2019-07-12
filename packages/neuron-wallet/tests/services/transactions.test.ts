@@ -4,7 +4,7 @@ import initConnection from '../../src/database/chain/ormconfig'
 import { initConnection as initAddressDB } from '../../src/database/address/ormconfig'
 import { tx as mockedTx } from '../fixtures/transactions'
 import TransactionEntity from '../../src/database/chain/entities/transaction'
-import { TransactionStatus } from '../../src/types/cell-types';
+import { TransactionStatus } from '../../src/types/cell-types'
 
 describe('transactions service', () => {
   describe('filterSearchType', () => {
