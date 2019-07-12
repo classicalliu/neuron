@@ -192,5 +192,34 @@ describe('transactions service', () => {
         expect(count2).toEqual(0)
       })
     })
+
+    describe('updateDescription', () => {
+      const description = 'test info'
+      it('updated', async () => {
+        const tx = await createTx()
+        const { hash } = tx
+        const transaction = await getConnection()
+          .getRepository(TransactionEntity)
+          .createQueryBuilder('tx')
+          .getOne()
+        expect(transaction!.description).toBeNull()
+        await TransactionsService.updateDescription(hash, description)
+        await transaction!.reload()
+        expect(transaction!.description).toEqual(description)
+      })
+
+      it('not found', async () => {
+        await createTx()
+        const hash = '0xa17363ce079cf43642e38489a7e94051e70d13a2845e0f2de5bdb51b0bef667a'
+        const transaction = await getConnection()
+          .getRepository(TransactionEntity)
+          .createQueryBuilder('tx')
+          .getOne()
+        expect(transaction!.description).toBeNull()
+        await TransactionsService.updateDescription(hash, description)
+        await transaction!.reload()
+        expect(transaction!.description).toBeNull()
+      })
+    })
   })
 })
