@@ -1,14 +1,6 @@
 import { getConnection, In, ObjectLiteral } from 'typeorm'
 import { ReplaySubject } from 'rxjs'
-import {
-  OutPoint,
-  Script,
-  Transaction,
-  TransactionWithoutHash,
-  Input,
-  Cell,
-  TransactionStatus,
-} from '../types/cell-types'
+import { OutPoint, Transaction, TransactionWithoutHash, Input, Cell, TransactionStatus } from '../types/cell-types'
 import CellsService from './cells'
 import InputEntity from '../database/chain/entities/input'
 import OutputEntity from '../database/chain/entities/output'
@@ -275,29 +267,6 @@ export default class TransactionsService {
     const transaction: Transaction = tx.toInterface()
 
     return transaction
-  }
-
-  // check whether the address has history transactions
-  public static hasTransactions = async (address: string): Promise<boolean> => {
-    const blake160 = core.utils.parseAddress(address, core.utils.AddressPrefix.Testnet, 'hex') as string
-    const contractInfo = await LockUtils.systemScript()
-
-    const lock: Script = {
-      codeHash: contractInfo.codeHash,
-      args: [blake160],
-    }
-    const lockHash: string = LockUtils.lockScriptToHash(lock)
-
-    const output: OutputEntity | undefined = await getConnection()
-      .getRepository(OutputEntity)
-      .findOne({
-        where: { lockHash },
-      })
-
-    if (output) {
-      return true
-    }
-    return false
   }
 
   // After the tx is sent:
