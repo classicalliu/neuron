@@ -88,18 +88,21 @@ describe('Key tests with db', () => {
     version: AddressVersion.Testnet,
   }
 
-  beforeAll(async () => {
+  beforeAll(async done => {
     await initConnection()
+    done()
   })
 
-  afterAll(async () => {
+  afterAll(async done => {
     await getConnection().close()
+    done()
   })
 
-  beforeEach(async () => {
+  beforeEach(async done => {
     const connection = getConnection()
     await connection.dropDatabase()
     await connection.synchronize()
+    done()
   })
 
   const generate = async (id: string = walletId) => {
