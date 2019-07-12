@@ -174,5 +174,23 @@ describe('transactions service', () => {
         expect(tx2!.blockHash).not.toBeNull()
       })
     })
+
+    describe('deleteByBlockNumbers', () => {
+      it('success', async () => {
+        const tx = await createTx()
+        const { blockNumber } = tx
+        const count = await getConnection()
+          .getRepository(TransactionEntity)
+          .createQueryBuilder('tx')
+          .getCount()
+        expect(count).toEqual(1)
+        await TransactionsService.deleteByBlockNumbers([blockNumber!])
+        const count2 = await getConnection()
+          .getRepository(TransactionEntity)
+          .createQueryBuilder('tx')
+          .getCount()
+        expect(count2).toEqual(0)
+      })
+    })
   })
 })
