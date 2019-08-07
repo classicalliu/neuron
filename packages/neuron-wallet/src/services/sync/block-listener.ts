@@ -105,5 +105,5 @@ export default class BlockListener {
 }
 
 NodeService.getInstance().tipNumberSubject.subscribe(async num => {
-  logger.info('tipNumberSubject:', num)
+  logger.info(`tipNumberSubject: ${num}`)
 })
