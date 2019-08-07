@@ -1,5 +1,7 @@
 import { Block, BlockHeader } from 'types/cell-types'
 import { TransactionPersistor } from 'services/tx'
+import logger from 'utils/logger'
+
 import GetBlocks from './get-blocks'
 import RangeForCheck, { CheckResultType } from './range-for-check'
 import BlockNumber from './block-number'
@@ -92,6 +94,7 @@ export default class Queue {
 
   public checkBlockHeader = async (blockHeaders: BlockHeader[]) => {
     const checkResult = this.rangeForCheck.check(blockHeaders)
+    logger.info(`checkBlockHeader: ${checkResult.success} ${checkResult.type}`)
     if (!checkResult.success) {
       if (checkResult.type === CheckResultType.FirstNotMatch) {
         const range = await this.rangeForCheck.getRange()

@@ -1,5 +1,7 @@
 import { BehaviorSubject, Subscription } from 'rxjs'
 import NodeService from 'services/node'
+import logger from 'utils/logger'
+
 import Queue from './queue'
 import RangeForCheck from './range-for-check'
 import BlockNumber from './block-number'
@@ -68,6 +70,7 @@ export default class BlockListener {
   }
 
   public regenerate = async (): Promise<void> => {
+    logger.info('call regenerate')
     if (this.queue && this.queue.length() > 0) {
       return
     }
@@ -100,3 +103,7 @@ export default class BlockListener {
     return this.queue
   }
 }
+
+NodeService.getInstance().tipNumberSubject.subscribe(async num => {
+  logger.info('tipNumberSubject:', num)
+})

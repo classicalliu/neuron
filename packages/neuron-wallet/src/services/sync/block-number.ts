@@ -3,6 +3,8 @@ import { getConnection } from 'typeorm'
 import SyncInfoEntity from 'database/chain/entities/sync-info'
 import CurrentBlockSubject from 'models/subjects/current-block-subject'
 
+import logger from 'utils/logger'
+
 const isRenderer = process && process.type === 'renderer'
 const currentBlockSubject = isRenderer
   ? remote.require('./models/subjects/current-block-subject').default.getSubject()
@@ -10,6 +12,7 @@ const currentBlockSubject = isRenderer
 
 export default class BlockNumber {
   private current: bigint | undefined = undefined
+  private objectID: number = +new Date()
 
   public getCurrent = async (): Promise<bigint> => {
     if (this.current) {
@@ -26,6 +29,7 @@ export default class BlockNumber {
   }
 
   public updateCurrent = async (current: bigint): Promise<void> => {
+    logger.info(`updateCurrent: ${this.objectID} ${current}`)
     let blockNumberEntity = await this.blockNumber()
     if (!blockNumberEntity) {
       blockNumberEntity = new SyncInfoEntity()
