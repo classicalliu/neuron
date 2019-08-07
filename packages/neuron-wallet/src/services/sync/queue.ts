@@ -6,6 +6,8 @@ import BlockNumber from './block-number'
 import Utils from './utils'
 import SimpleQueue from './simple-queue'
 
+import console = require('console')
+
 export default class Queue {
   private q: SimpleQueue
   private lockHashes: string[]
@@ -92,6 +94,7 @@ export default class Queue {
 
   public checkBlockHeader = async (blockHeaders: BlockHeader[]) => {
     const checkResult = this.rangeForCheck.check(blockHeaders)
+    console.error('checkBlockHeader:', checkResult.success, checkResult.type)
     if (!checkResult.success) {
       if (checkResult.type === CheckResultType.FirstNotMatch) {
         const range = await this.rangeForCheck.getRange()

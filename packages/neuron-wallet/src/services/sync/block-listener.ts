@@ -5,6 +5,8 @@ import RangeForCheck from './range-for-check'
 import BlockNumber from './block-number'
 import Utils from './utils'
 
+import console = require('console')
+
 export default class BlockListener {
   private lockHashes: string[]
   private tipBlockNumber: bigint = BigInt(-1)
@@ -68,6 +70,7 @@ export default class BlockListener {
   }
 
   public regenerate = async (): Promise<void> => {
+    console.error('call regenerate')
     if (this.queue && this.queue.length() > 0) {
       return
     }
@@ -85,6 +88,7 @@ export default class BlockListener {
     }
 
     if (!this.queue) {
+      console.error(`generateQueue.new`)
       this.queue = new Queue(
         this.lockHashes,
         startBlockNumber,
@@ -94,9 +98,14 @@ export default class BlockListener {
       )
       this.queue.process()
     } else {
+      console.error(`generateQueue.reset`)
       this.queue.reset(startBlockNumber, endBlockNumber)
     }
 
     return this.queue
   }
 }
+
+NodeService.getInstance().tipNumberSubject.subscribe(async num => {
+  console.error('tipNumberSubject:', num)
+})

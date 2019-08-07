@@ -8,8 +8,11 @@ const currentBlockSubject = isRenderer
   ? remote.require('./models/subjects/current-block-subject').default.getSubject()
   : CurrentBlockSubject.getSubject()
 
+import console = require('console')
+
 export default class BlockNumber {
   private current: bigint | undefined = undefined
+  private objectID: number = +new Date()
 
   public getCurrent = async (): Promise<bigint> => {
     if (this.current) {
@@ -26,6 +29,7 @@ export default class BlockNumber {
   }
 
   public updateCurrent = async (current: bigint): Promise<void> => {
+    console.error('updateCurrent:', this.objectID, current)
     let blockNumberEntity = await this.blockNumber()
     if (!blockNumberEntity) {
       blockNumberEntity = new SyncInfoEntity()
