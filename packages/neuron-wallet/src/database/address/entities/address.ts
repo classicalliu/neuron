@@ -96,6 +96,7 @@ export default class Address extends BaseEntity {
       pendingBalance: this.pendingBalance,
       balance: this.balance(),
       description: this.description,
+      isImport: this.isImport,
     }
   }
 

@@ -22,6 +22,7 @@ export interface Address {
   blake160: string
   version: AddressVersion
   description?: string
+  isImport: boolean
 }
 
 export default class AddressDao {
@@ -39,6 +40,7 @@ export default class AddressDao {
       addressEntity.liveBalance = address.liveBalance || '0'
       addressEntity.sentBalance = address.sentBalance || '0'
       addressEntity.pendingBalance = address.pendingBalance || '0'
+      addressEntity.isImport = address.isImport
       return addressEntity
     })
 

@@ -1,7 +1,8 @@
 import { remote } from 'electron'
 import AddressService from 'services/addresses'
 import LockUtils from 'models/lock-utils'
-import IndexerQueue from 'services/indexer/queue'
+import IndexerQueue, { LockHashInfo } from 'services/indexer/queue'
+import { Address } from 'database/address/dao'
 
 import { initDatabase } from './init-database'
 
@@ -11,10 +12,21 @@ const { nodeService, addressDbChangedSubject, walletCreatedSubject } = remote.re
 
 // maybe should call this every time when new address generated
 // load all addresses and convert to lockHashes
-export const loadAddressesAndConvert = async (): Promise<string[]> => {
-  const addresses: string[] = (await AddressService.allAddresses()).map(addr => addr.address)
-  const lockHashes: string[] = await LockUtils.addressesToAllLockHashes(addresses)
-  return lockHashes
+export const loadAddressesAndConvert = async (): Promise<LockHashInfo[]> => {
+  const addresses: Address[] = await AddressService.allAddresses()
+  const lockHashInfos: LockHashInfo[][] = await Promise.all(
+    addresses.map(async address => {
+      const lockHashes: string[] = await LockUtils.addressToAllLockHashes(address.address)
+      const infos = lockHashes.map(lockHash => {
+        return {
+          lockHash,
+          isImport: address.isImport,
+        }
+      })
+      return infos
+    })
+  )
+  return lockHashInfos.reduce((acc, val) => acc.concat(val), [])
 }
 
 // call this after network switched
@@ -28,16 +40,23 @@ export const switchNetwork = async (nodeURL: string) => {
   // disconnect old connection and connect to new database
   await initDatabase()
   // load lockHashes
-  const lockHashes: string[] = await loadAddressesAndConvert()
+  const lockHashInfos: LockHashInfo[] = await loadAddressesAndConvert()
+  // if network switched, the lockHashes should all be import(not create), it will index from 0
+  const lockHashInfosWithImport: LockHashInfo[] = lockHashInfos.map(info => {
+    return {
+      lockHash: info.lockHash,
+      isImport: true,
+    }
+  })
   // start sync blocks service
-  indexerQueue = new IndexerQueue(nodeURL, lockHashes, nodeService.tipNumberSubject)
+  indexerQueue = new IndexerQueue(nodeURL, lockHashInfosWithImport, nodeService.tipNumberSubject)
 
   addressDbChangedSubject.subscribe(async (event: string) => {
     // ignore update and remove
     if (event === 'AfterInsert') {
-      const hashes: string[] = await loadAddressesAndConvert()
+      const infos: LockHashInfo[] = await loadAddressesAndConvert()
       if (indexerQueue) {
-        indexerQueue.setLockHashes(hashes)
+        indexerQueue.setLockHashInfos(infos)
       }
     }
   })

@@ -13,6 +13,7 @@ export interface AddressMetaInfo {
   addressType: AddressType
   addressIndex: number
   accountExtendedPublicKey: AccountExtendedPublicKey
+  isImport: boolean
 }
 
 export default class AddressService {
@@ -24,6 +25,7 @@ export default class AddressService {
   public static generateAndSave = async (
     walletId: string,
     extendedKey: AccountExtendedPublicKey,
+    isImport: boolean,
     receivingStartIndex: number,
     changeStartIndex: number,
     receivingAddressCount: number = 20,
@@ -32,6 +34,7 @@ export default class AddressService {
     const addresses = AddressService.generateAddresses(
       walletId,
       extendedKey,
+      isImport,
       receivingStartIndex,
       changeStartIndex,
       receivingAddressCount,
@@ -46,9 +49,11 @@ export default class AddressService {
     await AddressDao.create(allAddresses)
   }
 
+  // when not the first time generate addresses in a wallet, the way should be undefined
   public static checkAndGenerateSave = async (
     walletId: string,
     extendedKey: AccountExtendedPublicKey,
+    isImport: boolean | undefined,
     receivingAddressCount: number = 20,
     changeAddressCount: number = 10
   ) => {
@@ -63,11 +68,16 @@ export default class AddressService {
     ) {
       return undefined
     }
+    const imported = maxIndexReceivingAddress === undefined ? isImport : maxIndexReceivingAddress.isImport
+    if (imported === undefined) {
+      throw new Error(`isImport can't be undefined`)
+    }
     const nextReceivingIndex = maxIndexReceivingAddress === undefined ? 0 : maxIndexReceivingAddress.addressIndex + 1
     const nextChangeIndex = maxIndexChangeAddress === undefined ? 0 : maxIndexChangeAddress.addressIndex + 1
     return AddressService.generateAndSave(
       walletId,
       extendedKey,
+      imported,
       nextReceivingIndex,
       nextChangeIndex,
       receivingAddressCount,
@@ -90,6 +100,7 @@ export default class AddressService {
   public static generateAddresses = (
     walletId: string,
     extendedKey: AccountExtendedPublicKey,
+    isImport: boolean,
     receivingStartIndex: number,
     changeStartIndex: number,
     receivingAddressCount: number = 20,
@@ -104,6 +115,7 @@ export default class AddressService {
       // extendedKey.address(AddressType.Receiving, idx)
       const addressMetaInfo: AddressMetaInfo = {
         walletId,
+        isImport,
         addressType: AddressType.Receiving,
         addressIndex: idx + receivingStartIndex,
         accountExtendedPublicKey: extendedKey,
@@ -116,6 +128,7 @@ export default class AddressService {
       // extendedKey.address(AddressType.Change, idx)
       const addressMetaInfo: AddressMetaInfo = {
         walletId,
+        isImport,
         addressType: AddressType.Change,
         addressIndex: idx + changeStartIndex,
         accountExtendedPublicKey: extendedKey,
@@ -132,7 +145,7 @@ export default class AddressService {
     }
   }
 
-  private static toAddress = (addressMetaInfo: AddressMetaInfo) => {
+  private static toAddress = (addressMetaInfo: AddressMetaInfo): AddressInterface[] => {
     const path: string = Address.pathFor(addressMetaInfo.addressType, addressMetaInfo.addressIndex)
     const testnetAddress: string = addressMetaInfo.accountExtendedPublicKey.address(
       addressMetaInfo.addressType,
@@ -161,6 +174,7 @@ export default class AddressService {
       balance: '0',
       blake160,
       version: AddressVersion.Testnet,
+      isImport: addressMetaInfo.isImport,
     }
 
     const mainnetAddressInfo = {
