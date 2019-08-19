@@ -73,6 +73,10 @@ export default class Address extends BaseEntity {
   @Column()
   pendingBalance: string = '0'
 
+  // from import or create
+  @Column()
+  isImport: boolean = true
+
   public balance = (): string => {
     return (BigInt(this.liveBalance) + BigInt(this.sentBalance) - BigInt(this.pendingBalance)).toString()
   }
